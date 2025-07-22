@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <!---为了不用编译，直接使用esm特性来加载，vite原理源码--->
+    <script type="module">
+        import {add} from './build/release.js'
+        console.log(add)
+    </script>
+</body>
+</html>
