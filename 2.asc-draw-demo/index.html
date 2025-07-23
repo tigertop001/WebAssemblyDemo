@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebAssembly Canvas Demo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        #canvas {
+            width: 100%;
+            height: 100vh;
+            background: #aff;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script type="module">
+        // 直接加载 WASM 文件
+        async function init() {
+            try {
+                // 获取 WASM 文件
+                const response = await fetch('./build/release.wasm');
+                const wasmBuffer = await response.arrayBuffer();
+                
+                // AssemblyScript 运行时需要的导入
+                const imports = {
+                    env: {
+                        abort: (msg, file, line, column) => {
+                            console.error(`Abort: ${msg} at ${file}:${line}:${column}`);
+                        },
+                        memory: new WebAssembly.Memory({ initial: 1 })
+                    },
+                    Math: Math,
+                    Mathf: Math, // AssemblyScript 使用 Mathf
+                };
+                
+                // 实例化 WebAssembly 模块
+                const wasmModule = await WebAssembly.instantiate(wasmBuffer, imports);
+                const exports = wasmModule.instance.exports;
+                
+                console.log("WASM exports:", exports);
+                console.log("Memory:", exports.memory);
+                console.log("Offset:", exports.offset);
+                console.log("Update function:", exports.update);
+                console.log("Resize function:", exports.resize);
+                
+                // 如果 memory 是从 exports 来的，使用它
+                const memory = exports.memory || imports.env.memory;
+                
+                const canvas = document.getElementById("canvas");
+                const context = canvas.getContext("2d");
+                const step = 0.012;
+                const upscaleFactor = 4;
+
+                let width, height, image;
+
+                function onresize() {
+                    width = (canvas.offsetWidth / upscaleFactor) | 0;
+                    height = (canvas.offsetHeight / upscaleFactor) | 0;
+                    canvas.width = width;
+                    canvas.height = height;
+                    image = context.createImageData(width, height);
+                    
+                    if (exports.resize) {
+                        exports.resize(width, height);
+                    }
+                }
+                
+                onresize();
+                new ResizeObserver(onresize).observe(canvas);
+
+                let tick = 0.0;
+                
+                (function update() {
+                    requestAnimationFrame(update);
+                    
+                    if (exports.update) {
+                        exports.update((tick += step));
+                        
+                        // 从 WebAssembly 内存读取像素数据
+                        const offset = exports.offset || 0;
+                        new Uint32Array(image.data.buffer).set(
+                            new Uint32Array(
+                                memory.buffer,
+                                offset,
+                                width * height
+                            )
+                        );
+                        
+                        context.putImageData(image, 0, 0);
+                    }
+                })();
+                
+            } catch (error) {
+                console.error("Failed to initialize WebAssembly:", error);
+                
+                // 打印更多调试信息
+                console.log("尝试检查 build 目录是否存在 release.wasm 文件");
+                console.log("确保已经运行了: npm run asbuild:release");
+            }
+        }
+
+        init();
+    </script>
+    
+    <!-- 调试脚本：检查模块加载 -->
+    <script type="module">
+        // 尝试不同的导入方式来调试
+        console.log("=== 调试信息 ===");
+        
+        // 检查 ES 模块
+        try {
+            const module = await import("./build/release.js");
+            console.log("ES Module 内容:", module);
+            console.log("ES Module keys:", Object.keys(module));
+            
+            // 如果有 default export
+            if (module.default) {
+                console.log("Default export:", module.default);
+                console.log("Default export type:", typeof module.default);
+                
+                // 如果 default 是一个函数（可能是 instantiate）
+                if (typeof module.default === 'function') {
+                    const instance = await module.default();
+                    console.log("Instantiated module:", instance);
+                }
+            }
+            
+            // 检查其他可能的导出
+            for (const [key, value] of Object.entries(module)) {
+                console.log(`Export '${key}':`, value, typeof value);
+            }
+            
+        } catch (e) {
+            console.error("模块导入失败:", e);
+        }
+    </script>
+</body>
+</html>

@@ -26,5 +26,5 @@ export function fib(n: number):number{
     for(let i=2; i <=n; i++){
         dp[i] = dp[i-1] + dp[i-2];
     }
-    return dp[n as i32]
+    return dp[n]
 }
