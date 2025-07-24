@@ -63,6 +63,6 @@ pub fn draw_triangle(){
         
         // 使用正确的方法设置填充样式
         context.set_fill_style(&wasm_bindgen::JsValue::from_str(&color));
-        context.fill_rect(x, y, size, size);
+        context.fill_rect(x, y, size*i as f64, size*i as f64);
     }
 }
