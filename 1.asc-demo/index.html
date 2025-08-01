@@ -3,33 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>WebAssembly vs JavaScript Performance Test</title>
 </head>
 <body>
+    <h1>WebAssembly vs JavaScript 性能对比</h1>
+    <div id="results"></div>
+    
     <!---为了不用编译，直接使用esm特性来加载，vite原理源码--->
     <script type="module">
-        import {add} from './build/release.js'
-        // preformance 做一下性能的评估
-        performance.mark("wasm_start");
-        console.log(add(1,2))
+        import {fib} from './build/release.js'
+
+        // 测试 WebAssembly 版本
+        performance.mark("wasm_start");  // 添加了开始标记
+        console.log("WASM fib(10):", fib(10));
         performance.mark("wasm_end");
-        performance.measure("wasm_time","wasm_start","wasm_end")
-        console.log(performance.getEntriesByName("wasm_time"))
+        performance.measure("wasm_time", "wasm_start", "wasm_end");
+        const wasmTime = performance.getEntriesByName("wasm_time")[0];
+        console.log("WASM 执行时间:", wasmTime);
 
-
-        function js_add(a, b) {
-            let res = 0
-            for (let i = 0 ; i <1000000000; i++){
-                res = 0;
+        // JavaScript 版本的斐波那契函数
+        function js_fib(n) {
+            if (n < 0) {
+                return n;
             }
-            return a+b;
+            if (n === 0 || n === 1) {
+                return n;
+            }
+            let dp = [];
+            dp[0] = 0;
+            dp[1] = 1;
+            let index = n;
+            for (let i = 2; i <= index; i++) {
+                dp[i] = dp[i - 1] + dp[i - 2];
+            }
+            return dp[index];
         }
 
+        // 测试 JavaScript 版本
         performance.mark("js_start");
-        console.log(js_add(1,2));
+        console.log("JS fib(10):", js_fib(10));
         performance.mark("js_end");
-        performance.measure("js_time","js_start","js_end");
-        console.log(performance.getEntriesByName("js_time"));
+        performance.measure("js_time", "js_start", "js_end");
+        const jsTime = performance.getEntriesByName("js_time")[0];
+        console.log("JS 执行时间:", jsTime);
+
+        // 显示结果对比
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = `
+            <h2>性能测试结果（计算 fib(10)）</h2>
+            <p><strong>WebAssembly 执行时间:</strong> ${wasmTime.duration.toFixed(4)} ms</p>
+            <p><strong>JavaScript 执行时间:</strong> ${jsTime.duration.toFixed(4)} ms</p>
+            <p><strong>性能对比:</strong> ${jsTime.duration > wasmTime.duration ? 
+                `WebAssembly 快 ${(jsTime.duration / wasmTime.duration).toFixed(2)} 倍` : 
+                `JavaScript 快 ${(wasmTime.duration / jsTime.duration).toFixed(2)} 倍`}</p>
+        `;
+
+        // 进行更大规模的测试
+        console.log("\n--- 更大规模测试 ---");
+        
+        // 测试 fib(30)
+        performance.mark("wasm_30_start");
+        const wasmResult30 = fib(30);
+        performance.mark("wasm_30_end");
+        performance.measure("wasm_30_time", "wasm_30_start", "wasm_30_end");
+        
+        performance.mark("js_30_start");
+        const jsResult30 = js_fib(30);
+        performance.mark("js_30_end");
+        performance.measure("js_30_time", "js_30_start", "js_30_end");
+        
+        const wasm30Time = performance.getEntriesByName("wasm_30_time")[0];
+        const js30Time = performance.getEntriesByName("js_30_time")[0];
+        
+        console.log(`fib(30) = ${wasmResult30}`);
+        console.log(`WASM fib(30) 时间: ${wasm30Time.duration.toFixed(4)} ms`);
+        console.log(`JS fib(30) 时间: ${js30Time.duration.toFixed(4)} ms`);
+        
+        resultsDiv.innerHTML += `
+            <hr>
+            <h2>性能测试结果（计算 fib(30)）</h2>
+            <p><strong>结果:</strong> ${wasmResult30}</p>
+            <p><strong>WebAssembly 执行时间:</strong> ${wasm30Time.duration.toFixed(4)} ms</p>
+            <p><strong>JavaScript 执行时间:</strong> ${js30Time.duration.toFixed(4)} ms</p>
+            <p><strong>性能对比:</strong> ${js30Time.duration > wasm30Time.duration ? 
+                `WebAssembly 快 ${(js30Time.duration / wasm30Time.duration).toFixed(2)} 倍` : 
+                `JavaScript 快 ${(wasm30Time.duration / js30Time.duration).toFixed(2)} 倍`}</p>
+        `;
     </script>
 </body>
 </html>

@@ -2804,7 +2804,8 @@
   (local $2 i32)
   (local $3 i32)
   (local $4 i32)
-  (local $5 f64)
+  (local $5 i32)
+  (local $6 f64)
   global.get $~lib/memory/__stack_pointer
   i32.const 12
   i32.sub
@@ -2821,12 +2822,12 @@
   f64.lt
   if
    local.get $0
-   local.set $5
+   local.set $6
    global.get $~lib/memory/__stack_pointer
    i32.const 12
    i32.add
    global.set $~lib/memory/__stack_pointer
-   local.get $5
+   local.get $6
    return
   end
   local.get $0
@@ -2841,12 +2842,12 @@
   end
   if
    local.get $0
-   local.set $5
+   local.set $6
    global.get $~lib/memory/__stack_pointer
    i32.const 12
    i32.add
    global.set $~lib/memory/__stack_pointer
-   local.get $5
+   local.get $6
    return
   end
   global.get $~lib/memory/__stack_pointer
@@ -2858,82 +2859,83 @@
   local.tee $2
   i32.store
   local.get $2
-  local.set $4
+  local.set $5
   global.get $~lib/memory/__stack_pointer
-  local.get $4
+  local.get $5
   i32.store offset=4
-  local.get $4
+  local.get $5
   i32.const 0
   f64.const 0
   call $~lib/array/Array<f64>#__set
   local.get $2
-  local.set $4
+  local.set $5
   global.get $~lib/memory/__stack_pointer
-  local.get $4
+  local.get $5
   i32.store offset=4
-  local.get $4
+  local.get $5
   i32.const 1
   f64.const 1
   call $~lib/array/Array<f64>#__set
-  i32.const 2
+  local.get $0
+  i32.trunc_sat_f64_s
   local.set $3
+  i32.const 2
+  local.set $4
   loop $for-loop|0
+   local.get $4
    local.get $3
-   f64.convert_i32_s
-   local.get $0
-   f64.le
+   i32.le_s
    if
     local.get $2
-    local.set $4
+    local.set $5
     global.get $~lib/memory/__stack_pointer
-    local.get $4
+    local.get $5
     i32.store offset=4
+    local.get $5
     local.get $4
-    local.get $3
     local.get $2
-    local.set $4
+    local.set $5
     global.get $~lib/memory/__stack_pointer
-    local.get $4
+    local.get $5
     i32.store offset=8
+    local.get $5
     local.get $4
-    local.get $3
     i32.const 1
     i32.sub
     call $~lib/array/Array<f64>#__get
     local.get $2
-    local.set $4
+    local.set $5
     global.get $~lib/memory/__stack_pointer
-    local.get $4
+    local.get $5
     i32.store offset=8
+    local.get $5
     local.get $4
-    local.get $3
     i32.const 2
     i32.sub
     call $~lib/array/Array<f64>#__get
     f64.add
     call $~lib/array/Array<f64>#__set
-    local.get $3
+    local.get $4
     i32.const 1
     i32.add
-    local.set $3
+    local.set $4
     br $for-loop|0
    end
   end
   local.get $2
-  local.set $4
-  global.get $~lib/memory/__stack_pointer
-  local.get $4
-  i32.store offset=4
-  local.get $4
-  local.get $0
-  i32.trunc_sat_f64_s
-  call $~lib/array/Array<f64>#__get
   local.set $5
+  global.get $~lib/memory/__stack_pointer
+  local.get $5
+  i32.store offset=4
+  local.get $5
+  local.get $3
+  call $~lib/array/Array<f64>#__get
+  local.set $6
   global.get $~lib/memory/__stack_pointer
   i32.const 12
   i32.add
   global.set $~lib/memory/__stack_pointer
-  local.get $5
+  local.get $6
   return
  )
  (func $~lib/array/Array<f64>#__visit (param $0 i32) (param $1 i32)
