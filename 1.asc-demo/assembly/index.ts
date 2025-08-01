@@ -10,10 +10,16 @@ export function sub(a: number, b: number): number {
     return a - b;
 }
 
-// 斐波拉契数列
-// dp 最不好的动态规划实现
-
+// 斐波那契数列 - 递归实现（性能测试用）
 export function fib(n: number): number {
+    if (n <= 1) {
+        return n;
+    }
+    return fib(n - 1) + fib(n - 2);
+}
+
+// 斐波那契数列 - 动态规划实现
+export function fibDP(n: number): number {
     if (n < 0) {
         return n;
     }
@@ -23,7 +29,7 @@ export function fib(n: number): number {
     let dp: number[] = [];
     dp[0] = 0;
     dp[1] = 1;
-    let index = <i32>n;
+    let index = <i32>n;  // 显式转换为 i32
     for (let i = 2; i <= index; i++) {
         dp[i] = dp[i - 1] + dp[i - 2];
     }

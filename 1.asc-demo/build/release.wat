@@ -6,13 +6,13 @@
  (type $4 (func (param i32 i32) (result i32)))
  (type $5 (func (param i32 i32 i32)))
  (type $6 (func (param f64 f64) (result f64)))
- (type $7 (func (param i32 i32 i32 i32)))
- (type $8 (func (param i32 i32 i64) (result i32)))
- (type $9 (func (result i32)))
- (type $10 (func (param i32 i32 i32) (result i32)))
- (type $11 (func (param i32 i32 f64)))
- (type $12 (func (param i32 i32) (result f64)))
- (type $13 (func (param f64) (result f64)))
+ (type $7 (func (param f64) (result f64)))
+ (type $8 (func (param i32 i32 i32 i32)))
+ (type $9 (func (param i32 i32 i64) (result i32)))
+ (type $10 (func (result i32)))
+ (type $11 (func (param i32 i32 i32) (result i32)))
+ (type $12 (func (param i32 i32 f64)))
+ (type $13 (func (param i32 i32) (result f64)))
  (type $14 (func (param i32 i32 i32 i32) (result i32)))
  (import "env" "abort" (func $~lib/builtins/abort (param i32 i32 i32 i32)))
  (global $~lib/shared/runtime/Runtime.Stub i32 (i32.const 0))
@@ -52,6 +52,7 @@
  (export "add" (func $assembly/index/add))
  (export "sub" (func $assembly/index/sub))
  (export "fib" (func $assembly/index/fib))
+ (export "fibDP" (func $assembly/index/fibDP))
  (export "memory" (memory $0))
  (start $~start)
  (func $assembly/index/add (param $0 f64) (param $1 f64) (result f64)
@@ -84,6 +85,25 @@
   local.get $0
   local.get $1
   f64.sub
+  return
+ )
+ (func $assembly/index/fib (param $0 f64) (result f64)
+  local.get $0
+  f64.const 1
+  f64.le
+  if
+   local.get $0
+   return
+  end
+  local.get $0
+  f64.const 1
+  f64.sub
+  call $assembly/index/fib
+  local.get $0
+  f64.const 2
+  f64.sub
+  call $assembly/index/fib
+  f64.add
   return
  )
  (func $~lib/rt/itcms/Object#set:nextWithColor (param $0 i32) (param $1 i32)
@@ -2799,7 +2819,7 @@
   local.get $4
   return
  )
- (func $assembly/index/fib (param $0 f64) (result f64)
+ (func $assembly/index/fibDP (param $0 f64) (result f64)
   (local $1 i32)
   (local $2 i32)
   (local $3 i32)

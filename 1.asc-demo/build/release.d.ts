@@ -20,3 +20,9 @@ export declare function sub(a: number, b: number): number;
  * @returns `f64`
  */
 export declare function fib(n: number): number;
+/**
+ * assembly/index/fibDP
+ * @param n `f64`
+ * @returns `f64`
+ */
+export declare function fibDP(n: number): number;
